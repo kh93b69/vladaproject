@@ -61,23 +61,6 @@ export default function ProfileScreen({ user, myTelegramId, onBack, onMatch }: P
 
   return (
     <div className="screen">
-      <button
-        onClick={onBack}
-        style={{
-          background: "none",
-          border: "none",
-          color: "white",
-          fontSize: 16,
-          fontWeight: 700,
-          cursor: "pointer",
-          alignSelf: "flex-start",
-          marginBottom: 16,
-          fontFamily: "Nunito",
-        }}
-      >
-        ← Назад
-      </button>
-
       {/* Большая аватарка */}
       <div style={{ textAlign: "center", marginBottom: 24 }}>
         <div

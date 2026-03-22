@@ -8,7 +8,6 @@ import ProfileScreen from "./components/ProfileScreen";
 import RatingScreen from "./components/RatingScreen";
 import { createUser, getUser } from "./api";
 
-// Типы экранов
 type Screen =
   | "loading"
   | "onboarding-name"
@@ -27,62 +26,73 @@ interface UserData {
   avatar: string;
 }
 
-// Список аватарок blob-персонажей
 const AVATARS = ["green-hat", "purple-viking", "red-bun", "lavender-beret", "pink-sombrero"];
 
 function getRandomAvatar() {
   return AVATARS[Math.floor(Math.random() * AVATARS.length)];
 }
 
-// Получаем telegram_id из Telegram WebApp или используем тестовый
 function getTelegramId(): number {
   try {
     const tg = (window as any).Telegram?.WebApp;
     if (tg?.initDataUnsafe?.user?.id) {
       return tg.initDataUnsafe.user.id;
     }
-  } catch {
-    // Если не в Telegram — используем тестовый ID
-  }
-  return 123456789; // Тестовый ID для разработки
+  } catch {}
+  return 123456789;
 }
 
 export default function App() {
   const [screen, setScreen] = useState<Screen>("loading");
   const [telegramId] = useState(getTelegramId);
-
-  // Данные онбординга (собираем пошагово)
   const [name, setName] = useState("");
   const [country, setCountry] = useState("");
   const [role, setRole] = useState("");
   const [selectedUser, setSelectedUser] = useState<any>(null);
 
-  // При загрузке проверяем, есть ли уже пользователь
   useEffect(() => {
-    // Инициализация Telegram WebApp
     try {
       const tg = (window as any).Telegram?.WebApp;
       if (tg) {
         tg.ready();
         tg.expand();
       }
-    } catch {
-      // Не в Telegram
-    }
+    } catch {}
 
-    // Проверяем, есть ли пользователь в базе
     getUser(telegramId)
-      .then(() => {
-        // Пользователь уже зарегистрирован — сразу на карту
-        setScreen("map");
-      })
-      .catch(() => {
-        // Новый пользователь — начинаем онбординг
-        setScreen("onboarding-name");
-      });
+      .then(() => setScreen("map"))
+      .catch(() => setScreen("onboarding-name"));
   }, [telegramId]);
 
-  // Обработчики шагов онбординга
+  // Навигация назад
+  const goBack = () => {
+    switch (screen) {
+      case "onboarding-role":
+        setScreen("onboarding-name");
+        break;
+      case "onboarding-interests":
+        setScreen("onboarding-role");
+        break;
+      case "profile":
+        setScreen("map");
+        break;
+      case "rating":
+        setScreen("profile");
+        break;
+      default:
+        break;
+    }
+  };
+
+  // Сброс — начать заново
+  const restart = () => {
+    setName("");
+    setCountry("");
+    setRole("");
+    setSelectedUser(null);
+    setScreen("onboarding-name");
+  };
+
   const handleName = (n: string, c: string) => {
     setName(n);
     setCountry(c);
@@ -103,7 +113,6 @@ export default function App() {
       interests,
       avatar: getRandomAvatar(),
     };
-
     try {
       await createUser(userData);
       setScreen("map");
@@ -113,64 +122,79 @@ export default function App() {
     }
   };
 
-  // Выбор пользователя из списка
   const handleSelectUser = (user: any) => {
     setSelectedUser(user);
     setScreen("profile");
   };
 
-  // После нажатия "Погнали!" — переходим к оценке
   const handleMatch = () => {
     setScreen("rating");
   };
 
-  // После отправки оценки — возвращаемся на карту
   const handleRatingDone = () => {
     setSelectedUser(null);
     setScreen("map");
   };
 
-  // Рендерим текущий экран
-  switch (screen) {
-    case "loading":
-      return (
-        <div className="screen">
-          <div className="loading">Загрузка...</div>
+  // Кнопка "Назад" — показывается на всех экранах кроме загрузки и первого
+  const showBack = !["loading", "onboarding-name", "map"].includes(screen);
+
+  return (
+    <>
+      {/* Верхняя панель навигации */}
+      {screen !== "loading" && (
+        <div style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          padding: "12px 20px 0",
+          maxWidth: 480,
+          margin: "0 auto",
+          width: "100%",
+        }}>
+          {showBack ? (
+            <button onClick={goBack} style={{
+              background: "none", border: "none", color: "white",
+              fontSize: 16, fontWeight: 700, cursor: "pointer", fontFamily: "Nunito",
+            }}>
+              ← Назад
+            </button>
+          ) : <div />}
+
+          {screen === "map" && (
+            <button onClick={restart} style={{
+              background: "rgba(255,255,255,0.2)", border: "none", color: "white",
+              fontSize: 13, fontWeight: 700, cursor: "pointer", fontFamily: "Nunito",
+              padding: "6px 14px", borderRadius: 50,
+            }}>
+              Сначала
+            </button>
+          )}
         </div>
-      );
+      )}
 
-    case "onboarding-name":
-      return <OnboardingName onNext={handleName} />;
-
-    case "onboarding-role":
-      return <OnboardingRole onNext={handleRole} />;
-
-    case "onboarding-interests":
-      return <OnboardingInterests onNext={handleInterests} />;
-
-    case "map":
-      return <MapScreen telegramId={telegramId} onSelectUser={handleSelectUser} />;
-
-    case "profile":
-      return (
+      {screen === "loading" && (
+        <div className="screen"><div className="loading">Загрузка...</div></div>
+      )}
+      {screen === "onboarding-name" && <OnboardingName onNext={handleName} />}
+      {screen === "onboarding-role" && <OnboardingRole onNext={handleRole} />}
+      {screen === "onboarding-interests" && <OnboardingInterests onNext={handleInterests} />}
+      {screen === "map" && <MapScreen telegramId={telegramId} onSelectUser={handleSelectUser} />}
+      {screen === "profile" && (
         <ProfileScreen
           user={selectedUser}
           myTelegramId={telegramId}
           onBack={() => setScreen("map")}
           onMatch={handleMatch}
         />
-      );
-
-    case "rating":
-      return (
+      )}
+      {screen === "rating" && (
         <RatingScreen
           mate={selectedUser}
           myTelegramId={telegramId}
           onDone={handleRatingDone}
         />
-      );
-
-    default:
-      return null;
-  }
+      )}
+    </>
+  );
 }
