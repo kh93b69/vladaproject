@@ -184,7 +184,6 @@ export default function App() {
         <ProfileScreen
           user={selectedUser}
           myTelegramId={telegramId}
-          onBack={() => setScreen("map")}
           onMatch={handleMatch}
         />
       )}

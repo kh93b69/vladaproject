@@ -30,11 +30,10 @@ const INTEREST_LABELS: Record<string, string> = {
 interface Props {
   user: User;
   myTelegramId: number;
-  onBack: () => void;
   onMatch: () => void;
 }
 
-export default function ProfileScreen({ user, myTelegramId, onBack, onMatch }: Props) {
+export default function ProfileScreen({ user, myTelegramId, onMatch }: Props) {
   const [avgRating, setAvgRating] = useState<number | null>(null);
   const [sending, setSending] = useState(false);
 
