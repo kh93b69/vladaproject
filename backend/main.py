@@ -42,8 +42,10 @@ def start_bot():
     WEBAPP_URL = os.getenv("WEBAPP_URL", "")
 
     if not BOT_TOKEN or not WEBAPP_URL:
-        print("BOT_TOKEN или WEBAPP_URL не заданы, бот не запущен")
+        print(f"BOT_TOKEN={'set' if BOT_TOKEN else 'EMPTY'}, WEBAPP_URL={'set' if WEBAPP_URL else 'EMPTY'} — бот не запущен")
         return
+
+    print(f"Запускаю бота с WEBAPP_URL={WEBAPP_URL}")
 
     async def start(update, context):
         keyboard = InlineKeyboardMarkup([
@@ -58,15 +60,11 @@ def start_bot():
             reply_markup=keyboard,
         )
 
-    async def run():
-        application = Application.builder().token(BOT_TOKEN).build()
-        application.add_handler(CommandHandler("start", start))
-        print("Бот запущен!")
-        await application.run_polling()
-
-    loop = asyncio.new_event_loop()
-    asyncio.set_event_loop(loop)
-    loop.run_until_complete(run())
+    # python-telegram-bot v21: run_polling() — синхронный метод, сам создаёт event loop
+    application = Application.builder().token(BOT_TOKEN).build()
+    application.add_handler(CommandHandler("start", start))
+    print("Бот запущен!")
+    application.run_polling()
 
 
 @app.on_event("startup")
