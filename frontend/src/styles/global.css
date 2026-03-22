@@ -1,0 +1,305 @@
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap');
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+:root {
+  --purple: #C084FC;
+  --purple-light: #E9D5FF;
+  --purple-bg: #F3E8FF;
+  --blue: #60A5FA;
+  --green: #4ADE80;
+  --orange: #FB923C;
+  --red: #F43F5E;
+  --white: #FFFFFF;
+  --dark: #1E1B4B;
+}
+
+body {
+  font-family: 'Nunito', sans-serif;
+  background: linear-gradient(170deg, #E9D5FF 0%, #DBEAFE 100%);
+  min-height: 100vh;
+  color: var(--white);
+  -webkit-font-smoothing: antialiased;
+}
+
+#root {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Общий контейнер экрана */
+.screen {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 24px 20px;
+  max-width: 480px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+/* Заголовки */
+.screen-title {
+  font-size: 28px;
+  font-weight: 900;
+  color: var(--white);
+  text-align: center;
+  margin-bottom: 8px;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.screen-subtitle {
+  font-size: 16px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.85);
+  text-align: center;
+  margin-bottom: 32px;
+}
+
+/* Поля ввода */
+.input-field {
+  width: 100%;
+  padding: 16px 20px;
+  border: none;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.9);
+  font-size: 16px;
+  font-family: 'Nunito', sans-serif;
+  font-weight: 600;
+  color: var(--dark);
+  outline: none;
+  margin-bottom: 16px;
+  backdrop-filter: blur(10px);
+}
+
+.input-field::placeholder {
+  color: #A78BFA;
+  font-weight: 400;
+}
+
+.input-field:focus {
+  box-shadow: 0 0 0 3px rgba(192, 132, 252, 0.4);
+}
+
+/* Select (dropdown) */
+.select-field {
+  width: 100%;
+  padding: 16px 20px;
+  border: none;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.9);
+  font-size: 16px;
+  font-family: 'Nunito', sans-serif;
+  font-weight: 600;
+  color: var(--dark);
+  outline: none;
+  margin-bottom: 16px;
+  appearance: none;
+  cursor: pointer;
+}
+
+/* Основная кнопка */
+.btn-primary {
+  width: 100%;
+  padding: 16px;
+  border: none;
+  border-radius: 16px;
+  background: var(--white);
+  color: var(--purple);
+  font-size: 18px;
+  font-weight: 800;
+  font-family: 'Nunito', sans-serif;
+  cursor: pointer;
+  margin-top: auto;
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+
+.btn-primary:active {
+  transform: scale(0.97);
+}
+
+.btn-primary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Карточки выбора (роль) */
+.role-card {
+  flex: 1;
+  padding: 24px 16px;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(10px);
+  border: 3px solid transparent;
+  cursor: pointer;
+  text-align: center;
+  transition: border-color 0.2s, background 0.2s;
+}
+
+.role-card.selected {
+  border-color: var(--white);
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.role-card-icon {
+  font-size: 64px;
+  margin-bottom: 12px;
+}
+
+.role-card-title {
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--white);
+}
+
+.role-card-desc {
+  font-size: 13px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.7);
+  margin-top: 4px;
+}
+
+/* Чипсы интересов */
+.interest-chip {
+  display: inline-block;
+  padding: 10px 20px;
+  border-radius: 50px;
+  background: rgba(255, 255, 255, 0.2);
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  color: var(--white);
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  margin: 6px;
+  transition: background 0.2s, border-color 0.2s;
+}
+
+.interest-chip.selected {
+  background: var(--white);
+  color: var(--purple);
+  border-color: var(--white);
+}
+
+/* Карточка профиля в списке */
+.profile-card {
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 20px;
+  padding: 16px;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  cursor: pointer;
+  transition: transform 0.15s;
+}
+
+.profile-card:active {
+  transform: scale(0.98);
+}
+
+.profile-avatar {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.profile-info {
+  flex: 1;
+}
+
+.profile-name {
+  font-size: 17px;
+  font-weight: 800;
+  color: var(--dark);
+}
+
+.profile-interests {
+  font-size: 13px;
+  color: #7C3AED;
+  font-weight: 600;
+  margin-top: 2px;
+}
+
+.profile-distance {
+  font-size: 13px;
+  color: #A78BFA;
+  font-weight: 600;
+  text-align: right;
+}
+
+/* Экран рейтинга */
+.rating-category {
+  margin-bottom: 24px;
+}
+
+.rating-label {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--white);
+  margin-bottom: 8px;
+}
+
+.rating-slider {
+  width: 100%;
+  height: 8px;
+  border-radius: 4px;
+  appearance: none;
+  background: rgba(255, 255, 255, 0.3);
+  outline: none;
+}
+
+.rating-slider::-webkit-slider-thumb {
+  appearance: none;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--white);
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.rating-value {
+  text-align: center;
+  font-size: 24px;
+  font-weight: 900;
+  color: var(--white);
+  margin-top: 4px;
+}
+
+/* Карта */
+.map-container {
+  border-radius: 20px;
+  overflow: hidden;
+  height: 280px;
+  margin-bottom: 20px;
+}
+
+.map-container .leaflet-container {
+  height: 100%;
+  width: 100%;
+  border-radius: 20px;
+}
+
+/* Анимация загрузки */
+.loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--white);
+}
+
+/* Лого */
+.logo {
+  width: 80px;
+  height: 80px;
+  margin: 0 auto 16px;
+}
