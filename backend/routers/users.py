@@ -2,6 +2,7 @@ from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 from typing import Optional
 import math
+import random
 
 router = APIRouter()
 
@@ -28,10 +29,59 @@ class UserUpdate(BaseModel):
     longitude: Optional[float] = None
 
 
+# Данные для генерации фейковых гидов
+FAKE_NAMES = [
+    "Мария", "Ахмед", "Лейла", "Дженк", "Айше",
+    "Карлос", "София", "Юки", "Пьер", "Анна",
+    "Марко", "Изабель", "Хироши", "Елена", "Рауль",
+]
+
+FAKE_AVATARS = ["green-hat", "purple-viking", "red-bun", "lavender-beret", "pink-sombrero"]
+
+ALL_INTERESTS = ["bars", "clubs", "quiet", "crowded", "nature", "food", "art", "sport", "shopping", "history", "nightlife", "local_food"]
+
+
+def generate_fake_guides(lat: float, lon: float, count: int = 5) -> list:
+    """Генерация фейковых гидов рядом с пользователем"""
+    guides = []
+    used_names = set()
+
+    for i in range(count):
+        # Случайное смещение: 0.5-5 км от пользователя
+        offset_lat = random.uniform(-0.03, 0.03)
+        offset_lon = random.uniform(-0.03, 0.03)
+
+        # Уникальное имя
+        name = random.choice([n for n in FAKE_NAMES if n not in used_names] or FAKE_NAMES)
+        used_names.add(name)
+
+        # Случайные интересы (2-4 штуки)
+        interests = random.sample(ALL_INTERESTS, random.randint(2, 4))
+
+        fake_lat = lat + offset_lat
+        fake_lon = lon + offset_lon
+        distance = haversine_distance(lat, lon, fake_lat, fake_lon)
+
+        guides.append({
+            "telegram_id": 900000 + i,
+            "name": name,
+            "country": "Местный",
+            "role": "local",
+            "interests": interests,
+            "avatar": random.choice(FAKE_AVATARS),
+            "latitude": round(fake_lat, 6),
+            "longitude": round(fake_lon, 6),
+            "distance_km": round(distance, 1),
+            "is_fake": True,
+        })
+
+    guides.sort(key=lambda x: x["distance_km"])
+    return guides
+
+
 @router.post("/")
 def create_user(user: UserCreate):
     """Создать нового пользователя или вернуть существующего"""
-    # Проверяем, есть ли уже пользователь с таким telegram_id
     existing = supabase.table("users").select("*").eq("telegram_id", user.telegram_id).execute()
     if existing.data:
         return existing.data[0]
@@ -72,7 +122,6 @@ def haversine_distance(lat1: float, lon1: float, lat2: float, lon2: float) -> fl
 @router.get("/{telegram_id}/nearby")
 def get_nearby_users(telegram_id: int, radius_km: float = 50):
     """Найти ближайших пользователей с противоположной ролью"""
-    # Получаем текущего пользователя
     current = supabase.table("users").select("*").eq("telegram_id", telegram_id).execute()
     if not current.data:
         raise HTTPException(status_code=404, detail="Пользователь не найден")
@@ -81,11 +130,10 @@ def get_nearby_users(telegram_id: int, radius_km: float = 50):
     if not user.get("latitude") or not user.get("longitude"):
         raise HTTPException(status_code=400, detail="Геолокация не указана")
 
-    # Ищем пользователей с противоположной ролью
+    # Ищем реальных пользователей с противоположной ролью
     opposite_role = "local" if user["role"] == "tourist" else "tourist"
     others = supabase.table("users").select("*").eq("role", opposite_role).neq("telegram_id", telegram_id).execute()
 
-    # Фильтруем по расстоянию
     nearby = []
     for other in others.data:
         if other.get("latitude") and other.get("longitude"):
@@ -96,6 +144,12 @@ def get_nearby_users(telegram_id: int, radius_km: float = 50):
             if distance <= radius_km:
                 other["distance_km"] = round(distance, 1)
                 nearby.append(other)
+
+    # Если реальных мало — добавляем фейковых гидов
+    if len(nearby) < 3:
+        fakes_needed = 5 - len(nearby)
+        fakes = generate_fake_guides(user["latitude"], user["longitude"], fakes_needed)
+        nearby.extend(fakes)
 
     nearby.sort(key=lambda x: x["distance_km"])
     return nearby
