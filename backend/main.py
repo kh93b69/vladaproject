@@ -1,6 +1,10 @@
 import os
+import asyncio
+import threading
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
 from dotenv import load_dotenv
 from supabase import create_client
 
@@ -8,10 +12,10 @@ load_dotenv()
 
 app = FastAPI(title="MeetMates API")
 
-# CORS для фронтенда
+# CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[os.getenv("FRONTEND_URL", "http://localhost:5173"), "*"],
+    allow_origins=["*"],
     allow_methods=["*"],
     allow_headers=["*"],
 )
@@ -29,6 +33,59 @@ app.include_router(matches.router, prefix="/api/matches", tags=["matches"])
 app.include_router(ratings.router, prefix="/api/ratings", tags=["ratings"])
 
 
-@app.get("/")
-def root():
-    return {"status": "ok", "app": "MeetMates API"}
+# --- Telegram бот в фоновом потоке ---
+def start_bot():
+    from telegram import InlineKeyboardButton, InlineKeyboardMarkup, WebAppInfo
+    from telegram.ext import Application, CommandHandler
+
+    BOT_TOKEN = os.getenv("BOT_TOKEN", "")
+    WEBAPP_URL = os.getenv("WEBAPP_URL", "")
+
+    if not BOT_TOKEN or not WEBAPP_URL:
+        print("BOT_TOKEN или WEBAPP_URL не заданы, бот не запущен")
+        return
+
+    async def start(update, context):
+        keyboard = InlineKeyboardMarkup([
+            [InlineKeyboardButton(
+                text="Открыть MeetMates",
+                web_app=WebAppInfo(url=WEBAPP_URL)
+            )]
+        ])
+        await update.message.reply_text(
+            "Привет! Я MeetMates — помогу найти интересных людей рядом с тобой.\n\n"
+            "Нажми кнопку ниже, чтобы начать!",
+            reply_markup=keyboard,
+        )
+
+    async def run():
+        application = Application.builder().token(BOT_TOKEN).build()
+        application.add_handler(CommandHandler("start", start))
+        print("Бот запущен!")
+        await application.run_polling()
+
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
+    loop.run_until_complete(run())
+
+
+@app.on_event("startup")
+def on_startup():
+    # Запускаем бота в отдельном потоке
+    bot_thread = threading.Thread(target=start_bot, daemon=True)
+    bot_thread.start()
+
+
+# --- Отдача фронтенда как статики ---
+STATIC_DIR = os.path.join(os.path.dirname(__file__), "static")
+
+if os.path.isdir(STATIC_DIR):
+    # API-роуты уже подключены выше, статику подключаем последней
+    @app.get("/{full_path:path}")
+    async def serve_frontend(full_path: str):
+        # Если файл существует — отдаём его
+        file_path = os.path.join(STATIC_DIR, full_path)
+        if os.path.isfile(file_path):
+            return FileResponse(file_path)
+        # Иначе — отдаём index.html (SPA routing)
+        return FileResponse(os.path.join(STATIC_DIR, "index.html"))

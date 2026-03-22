@@ -1,5 +1,6 @@
-// Базовый URL бэкенда — при деплое заменить на реальный
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
+// В продакшене фронт и бэк на одном домене, API_URL = ""
+// В разработке — localhost:8000
+const API_URL = import.meta.env.VITE_API_URL || "";
 
 // Универсальная функция для запросов к API
 async function request(path: string, options?: RequestInit) {
