@@ -5,16 +5,34 @@ import "leaflet/dist/leaflet.css";
 import ProfileCard from "./ProfileCard";
 import { getNearbyUsers, updateUser } from "../api";
 
-// Фикс иконки маркера для Leaflet
-import markerIcon2x from "leaflet/dist/images/marker-icon-2x.png";
-import markerIcon from "leaflet/dist/images/marker-icon.png";
-import markerShadow from "leaflet/dist/images/marker-shadow.png";
+// Цвета blob-персонажей
+const AVATAR_COLORS: Record<string, string> = {
+  "green-hat": "%234ADE80",
+  "purple-viking": "%238B5CF6",
+  "red-bun": "%23F43F5E",
+  "lavender-beret": "%23A78BFA",
+  "pink-sombrero": "%23EC4899",
+};
 
-L.Icon.Default.mergeOptions({
-  iconRetinaUrl: markerIcon2x,
-  iconUrl: markerIcon,
-  shadowUrl: markerShadow,
-});
+// SVG blob-маркер
+function blobIcon(avatar: string, isMe = false): L.DivIcon {
+  const color = AVATAR_COLORS[avatar] || "%23C084FC";
+  const size = isMe ? 48 : 40;
+
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 100 100">
+    <circle cx="50" cy="50" r="42" fill="${color}" stroke="white" stroke-width="4"/>
+    <circle cx="38" cy="42" r="4" fill="white"/>
+    <circle cx="62" cy="42" r="4" fill="white"/>
+    <path d="M36 58 Q50 68 64 58" stroke="white" stroke-width="3" stroke-linecap="round" fill="none"/>
+  </svg>`;
+
+  return L.divIcon({
+    html: `<div style="width:${size}px;height:${size}px;filter:drop-shadow(0 2px 4px rgba(0,0,0,0.3))">${svg}</div>`,
+    iconSize: [size, size],
+    iconAnchor: [size / 2, size / 2],
+    className: "",
+  });
+}
 
 interface User {
   telegram_id: number;
@@ -38,7 +56,6 @@ export default function MapScreen({ telegramId, onSelectUser }: Props) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Получаем геолокацию
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         async (pos) => {
@@ -46,7 +63,6 @@ export default function MapScreen({ telegramId, onSelectUser }: Props) {
           const lng = pos.coords.longitude;
           setPosition([lat, lng]);
 
-          // Обновляем координаты пользователя на сервере
           try {
             await updateUser(telegramId, { latitude: lat, longitude: lng });
             const nearby = await getNearbyUsers(telegramId);
@@ -57,7 +73,6 @@ export default function MapScreen({ telegramId, onSelectUser }: Props) {
           setLoading(false);
         },
         () => {
-          // Если геолокация недоступна — ставим Москву по умолчанию
           setPosition([55.7558, 37.6173]);
           setLoading(false);
         }
@@ -83,25 +98,29 @@ export default function MapScreen({ telegramId, onSelectUser }: Props) {
       </h1>
 
       <div className="map-container">
-        <MapContainer center={position} zoom={12} scrollWheelZoom={false}>
+        <MapContainer center={position} zoom={13} scrollWheelZoom={false}>
           <TileLayer
-            attribution=""
-            url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
+            attribution='&copy; <a href="https://osm.org">OSM</a>'
+            url="https://tile.openstreetmap.org/{z}/{x}/{y}.png"
           />
-          {/* Маркер текущего пользователя */}
-          <Marker position={position}>
+          {/* Маркер текущего пользователя — blob */}
+          <Marker position={position} icon={blobIcon("green-hat", true)}>
             <Popup>Ты здесь</Popup>
           </Marker>
-          {/* Маркеры других пользователей */}
+          {/* Маркеры гидов — blob-персонажи */}
           {users.map((u) => (
-            <Marker key={u.telegram_id} position={[u.latitude, u.longitude]}>
+            <Marker
+              key={u.telegram_id}
+              position={[u.latitude, u.longitude]}
+              icon={blobIcon(u.avatar)}
+              eventHandlers={{ click: () => onSelectUser(u) }}
+            >
               <Popup>{u.name}</Popup>
             </Marker>
           ))}
         </MapContainer>
       </div>
 
-      {/* Список карточек */}
       {users.length === 0 ? (
         <p className="screen-subtitle">Пока никого не нашли рядом</p>
       ) : (
