@@ -70,7 +70,7 @@ def start_bot():
     async def run():
         await application.initialize()
         await application.start()
-        await application.updater.start_polling()
+        await application.updater.start_polling(drop_pending_updates=True)
         print("Бот запущен!")
         # Держим бота живым
         while True:
