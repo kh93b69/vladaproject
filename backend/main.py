@@ -60,11 +60,23 @@ def start_bot():
             reply_markup=keyboard,
         )
 
-    # python-telegram-bot v21: run_polling() — синхронный метод, сам создаёт event loop
+    # Создаём свой event loop для потока и запускаем бота вручную
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
+
     application = Application.builder().token(BOT_TOKEN).build()
     application.add_handler(CommandHandler("start", start))
-    print("Бот запущен!")
-    application.run_polling()
+
+    async def run():
+        await application.initialize()
+        await application.start()
+        await application.updater.start_polling()
+        print("Бот запущен!")
+        # Держим бота живым
+        while True:
+            await asyncio.sleep(3600)
+
+    loop.run_until_complete(run())
 
 
 @app.on_event("startup")
