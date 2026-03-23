@@ -86,7 +86,10 @@ export default function MapScreen({ telegramId, onSelectUser }: Props) {
   if (loading || !position) {
     return (
       <div className="screen">
-        <div className="loading">Ищем людей рядом...</div>
+        <div className="loading">
+          <div className="loading-spinner" />
+          Ищем спутника рядом...
+        </div>
       </div>
     );
   }

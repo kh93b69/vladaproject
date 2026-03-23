@@ -12,6 +12,7 @@ CREATE TABLE users (
   avatar TEXT DEFAULT 'green-hat',
   latitude DOUBLE PRECISION,
   longitude DOUBLE PRECISION,
+  is_admin BOOLEAN DEFAULT false,
   created_at TIMESTAMPTZ DEFAULT now()
 );
 

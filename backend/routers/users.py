@@ -38,7 +38,22 @@ FAKE_NAMES = [
 
 FAKE_AVATARS = ["green-hat", "purple-viking", "red-bun", "lavender-beret", "pink-sombrero"]
 
-ALL_INTERESTS = ["bars", "clubs", "quiet", "crowded", "nature", "food", "art", "sport", "shopping", "history", "nightlife", "local_food"]
+ALL_INTERESTS = ["bars", "clubs", "walks", "food", "nature", "art", "sport", "shopping", "history", "nightlife", "local_food", "trips", "new_things"]
+
+FAKE_DESCRIPTIONS = [
+    "Поехали с нами на шашлыки!",
+    "Покажу лучшие кофейни города",
+    "Знаю все секретные бары в центре",
+    "Люблю пешие прогулки по старому городу",
+    "Могу показать места, которых нет в путеводителях",
+    "Обожаю уличную еду, покажу лучшие точки!",
+    "Знаю крутые смотровые площадки",
+    "Поедем на природу за город!",
+    "Покажу ночную жизнь города",
+    "Расскажу историю каждого здания",
+    "Давай сходим на местный рынок",
+    "Знаю классные спортивные площадки",
+]
 
 
 def generate_fake_guides(lat: float, lon: float, count: int = 5) -> list:
@@ -72,6 +87,8 @@ def generate_fake_guides(lat: float, lon: float, count: int = 5) -> list:
             "latitude": round(fake_lat, 6),
             "longitude": round(fake_lon, 6),
             "distance_km": round(distance, 1),
+            "description": random.choice(FAKE_DESCRIPTIONS),
+            "avg_rating": round(random.uniform(6.0, 9.8), 1),
             "is_fake": True,
         })
 
@@ -130,9 +147,8 @@ def get_nearby_users(telegram_id: int, radius_km: float = 50):
     if not user.get("latitude") or not user.get("longitude"):
         raise HTTPException(status_code=400, detail="Геолокация не указана")
 
-    # Ищем реальных пользователей с противоположной ролью
-    opposite_role = "local" if user["role"] == "tourist" else "tourist"
-    others = supabase.table("users").select("*").eq("role", opposite_role).neq("telegram_id", telegram_id).execute()
+    # Ищем реальных пользователей (всех, кроме себя)
+    others = supabase.table("users").select("*").neq("telegram_id", telegram_id).execute()
 
     nearby = []
     for other in others.data:

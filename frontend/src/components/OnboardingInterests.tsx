@@ -3,16 +3,17 @@ import { useState } from "react";
 const INTERESTS = [
   { id: "bars", label: "Бары", emoji: "🍸" },
   { id: "clubs", label: "Клубы", emoji: "🎶" },
-  { id: "quiet", label: "Тихие места", emoji: "🌿" },
-  { id: "crowded", label: "Людные места", emoji: "🎉" },
-  { id: "nature", label: "Природа", emoji: "🏔" },
+  { id: "walks", label: "Прогулки по городу", emoji: "🚶" },
   { id: "food", label: "Еда", emoji: "🍜" },
+  { id: "nature", label: "Природа", emoji: "🏔" },
   { id: "art", label: "Искусство", emoji: "🎨" },
   { id: "sport", label: "Спорт", emoji: "⚽" },
   { id: "shopping", label: "Шопинг", emoji: "🛍" },
   { id: "history", label: "История", emoji: "🏛" },
   { id: "nightlife", label: "Ночная жизнь", emoji: "🌙" },
-  { id: "local_food", label: "Локальная кухня", emoji: "🥘" },
+  { id: "local_food", label: "Местная кухня", emoji: "🥘" },
+  { id: "trips", label: "Поездки загород", emoji: "🚗" },
+  { id: "new_things", label: "Хочу попробовать что-то новое", emoji: "✨" },
 ];
 
 interface Props {

@@ -5,25 +5,10 @@ interface User {
   interests: string[];
   avatar: string;
   distance_km?: number;
+  description?: string;
+  avg_rating?: number;
 }
 
-// Маппинг интересов на русские названия
-const INTEREST_LABELS: Record<string, string> = {
-  bars: "Бары",
-  clubs: "Клубы",
-  quiet: "Тихие места",
-  crowded: "Людные места",
-  nature: "Природа",
-  food: "Еда",
-  art: "Искусство",
-  sport: "Спорт",
-  shopping: "Шопинг",
-  history: "История",
-  nightlife: "Ночная жизнь",
-  local_food: "Локальная кухня",
-};
-
-// Цвета аватарок blob-персонажей
 const AVATAR_COLORS: Record<string, string> = {
   "green-hat": "#4ADE80",
   "purple-viking": "#8B5CF6",
@@ -39,14 +24,9 @@ interface Props {
 
 export default function ProfileCard({ user, onClick }: Props) {
   const bgColor = AVATAR_COLORS[user.avatar] || "#C084FC";
-  const interestLabels = user.interests
-    .map((i) => INTEREST_LABELS[i] || i)
-    .slice(0, 3)
-    .join(", ");
 
   return (
     <div className="profile-card" onClick={onClick}>
-      {/* Круглая аватарка blob-персонажа */}
       <div
         className="profile-avatar"
         style={{
@@ -63,7 +43,15 @@ export default function ProfileCard({ user, onClick }: Props) {
 
       <div className="profile-info">
         <div className="profile-name">{user.name}</div>
-        <div className="profile-interests">{interestLabels}</div>
+        {user.description && (
+          <div className="profile-desc">{user.description}</div>
+        )}
+        {user.avg_rating !== undefined && user.avg_rating > 0 && (
+          <div className="profile-stars">
+            {"★".repeat(Math.round(user.avg_rating / 2))}{"☆".repeat(5 - Math.round(user.avg_rating / 2))}
+            {" "}{user.avg_rating.toFixed(1)}
+          </div>
+        )}
       </div>
 
       {user.distance_km !== undefined && (

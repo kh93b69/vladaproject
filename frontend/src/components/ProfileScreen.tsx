@@ -9,23 +9,31 @@ interface User {
   avatar: string;
   country?: string;
   distance_km?: number;
+  description?: string;
 }
 
-// Маппинг интересов
 const INTEREST_LABELS: Record<string, string> = {
   bars: "Бары",
   clubs: "Клубы",
-  quiet: "Тихие места",
-  crowded: "Людные места",
-  nature: "Природа",
+  walks: "Прогулки по городу",
   food: "Еда",
+  nature: "Природа",
   art: "Искусство",
   sport: "Спорт",
   shopping: "Шопинг",
   history: "История",
   nightlife: "Ночная жизнь",
-  local_food: "Локальная кухня",
+  local_food: "Местная кухня",
+  trips: "Поездки загород",
+  new_things: "Что-то новое",
 };
+
+interface RatingData {
+  safety: number;
+  experience: number;
+  communication: number;
+  overall: number;
+}
 
 interface Props {
   user: User;
@@ -34,14 +42,14 @@ interface Props {
 }
 
 export default function ProfileScreen({ user, myTelegramId, onMatch }: Props) {
-  const [avgRating, setAvgRating] = useState<number | null>(null);
+  const [ratings, setRatings] = useState<RatingData | null>(null);
   const [sending, setSending] = useState(false);
 
   useEffect(() => {
     getUserRatings(user.telegram_id)
       .then((data) => {
         if (data.average) {
-          setAvgRating(data.average.overall);
+          setRatings(data.average);
         }
       })
       .catch(() => {});
@@ -60,7 +68,6 @@ export default function ProfileScreen({ user, myTelegramId, onMatch }: Props) {
 
   return (
     <div className="screen">
-      {/* Большая аватарка */}
       <div style={{ textAlign: "center", marginBottom: 24 }}>
         <div
           style={{
@@ -84,17 +91,16 @@ export default function ProfileScreen({ user, myTelegramId, onMatch }: Props) {
           {user.country ? ` · ${user.country}` : ""}
         </p>
 
-        {avgRating !== null && (
-          <div style={{
-            display: "inline-block",
-            background: "rgba(255,255,255,0.2)",
-            borderRadius: 50,
-            padding: "6px 16px",
+        {user.description && (
+          <p style={{
             fontSize: 15,
-            fontWeight: 700,
+            color: "rgba(255,255,255,0.7)",
+            fontWeight: 600,
+            marginBottom: 16,
+            fontStyle: "italic",
           }}>
-            ⭐ {avgRating} / 10
-          </div>
+            "{user.description}"
+          </p>
         )}
       </div>
 
@@ -107,11 +113,37 @@ export default function ProfileScreen({ user, myTelegramId, onMatch }: Props) {
         ))}
       </div>
 
+      {/* Детальные оценки */}
+      {ratings && (
+        <div style={{
+          background: "rgba(255,255,255,0.08)",
+          borderRadius: 16,
+          padding: 16,
+          marginBottom: 24,
+        }}>
+          <div style={{ fontSize: 16, fontWeight: 800, marginBottom: 12 }}>
+            Оценки от других пользователей
+          </div>
+          <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+            <RatingRow label="Безопасность" value={ratings.safety} />
+            <RatingRow label="Общение" value={ratings.communication} />
+            <RatingRow label="Времяпрепровождение" value={ratings.experience} />
+          </div>
+          <div style={{
+            marginTop: 12,
+            textAlign: "center",
+            fontSize: 18,
+            fontWeight: 900,
+          }}>
+            Общая: {ratings.overall.toFixed(1)} / 10
+          </div>
+        </div>
+      )}
+
       {user.distance_km !== undefined && (
         <p className="screen-subtitle">📍 {user.distance_km} км от тебя</p>
       )}
 
-      {/* Кнопка Погнали! */}
       <button
         className="btn-primary"
         onClick={handleMatch}
@@ -120,6 +152,35 @@ export default function ProfileScreen({ user, myTelegramId, onMatch }: Props) {
       >
         {sending ? "Отправляем..." : "Погнали! 🚀"}
       </button>
+    </div>
+  );
+}
+
+function RatingRow({ label, value }: { label: string; value: number }) {
+  return (
+    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+      <span style={{ fontSize: 14, fontWeight: 600, color: "rgba(255,255,255,0.7)" }}>
+        {label}
+      </span>
+      <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+        <div style={{
+          width: 100,
+          height: 6,
+          borderRadius: 3,
+          background: "rgba(255,255,255,0.15)",
+          overflow: "hidden",
+        }}>
+          <div style={{
+            width: `${value * 10}%`,
+            height: "100%",
+            borderRadius: 3,
+            background: value >= 7 ? "#4ADE80" : value >= 4 ? "#FB923C" : "#F43F5E",
+          }} />
+        </div>
+        <span style={{ fontSize: 14, fontWeight: 800, minWidth: 35, textAlign: "right" }}>
+          {value}/10
+        </span>
+      </div>
     </div>
   );
 }

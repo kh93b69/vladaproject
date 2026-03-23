@@ -70,16 +70,43 @@ def start_bot():
                 )]
             ])
             await update.message.reply_text(
-                "Привет! Я MeetMates — помогу найти интересных людей рядом с тобой.\n\n"
+                "Привет! Мы MeetMates — поможем найти тебе спутника для путешествий и прогулок!\n\n"
                 "Нажми кнопку ниже, чтобы начать!",
                 reply_markup=keyboard,
             )
+
+        async def admin_stats(update, context):
+            tg_id = update.effective_user.id
+            # Проверяем is_admin в Supabase
+            check = supabase.table("users").select("is_admin").eq("telegram_id", tg_id).execute()
+            if not check.data or not check.data[0].get("is_admin"):
+                await update.message.reply_text("Нет доступа.")
+                return
+            try:
+                users_result = supabase.table("users").select("id", count="exact").execute()
+                matches_result = supabase.table("matches").select("id", count="exact").execute()
+                ratings_result = supabase.table("ratings").select("id", count="exact").execute()
+
+                total_users = users_result.count if users_result.count is not None else len(users_result.data)
+                total_matches = matches_result.count if matches_result.count is not None else len(matches_result.data)
+                total_ratings = ratings_result.count if ratings_result.count is not None else len(ratings_result.data)
+
+                text = (
+                    f"📊 Статистика MeetMates\n\n"
+                    f"👥 Пользователей: {total_users}\n"
+                    f"🤝 Мэтчей: {total_matches}\n"
+                    f"⭐ Оценок: {total_ratings}\n"
+                )
+                await update.message.reply_text(text)
+            except Exception as e:
+                await update.message.reply_text(f"Ошибка: {e}")
 
         loop = asyncio.new_event_loop()
         asyncio.set_event_loop(loop)
 
         application = Application.builder().token(BOT_TOKEN).build()
         application.add_handler(CommandHandler("start", start))
+        application.add_handler(CommandHandler("stats", admin_stats))
 
         async def run():
             await application.initialize()

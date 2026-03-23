@@ -1,26 +1,28 @@
 import { useState, useEffect } from "react";
 import "./styles/global.css";
 import OnboardingName from "./components/OnboardingName";
-import OnboardingRole from "./components/OnboardingRole";
 import OnboardingInterests from "./components/OnboardingInterests";
 import MapScreen from "./components/MapScreen";
 import ProfileScreen from "./components/ProfileScreen";
 import RatingScreen from "./components/RatingScreen";
+import RecommendationsScreen from "./components/RecommendationsScreen";
 import { createUser, getUser } from "./api";
 
 type Screen =
   | "loading"
   | "onboarding-name"
-  | "onboarding-role"
   | "onboarding-interests"
   | "map"
   | "profile"
-  | "rating";
+  | "rating"
+  | "recommendations";
 
 interface UserData {
   telegram_id: number;
   name: string;
   country: string;
+  city: string;
+  age: string;
   role: string;
   interests: string[];
   avatar: string;
@@ -47,7 +49,8 @@ export default function App() {
   const [telegramId] = useState(getTelegramId);
   const [name, setName] = useState("");
   const [country, setCountry] = useState("");
-  const [role, setRole] = useState("");
+  const [age, setAge] = useState("");
+  const [city, setCity] = useState("");
   const [selectedUser, setSelectedUser] = useState<any>(null);
 
   useEffect(() => {
@@ -64,14 +67,10 @@ export default function App() {
       .catch(() => setScreen("onboarding-name"));
   }, [telegramId]);
 
-  // Навигация назад
   const goBack = () => {
     switch (screen) {
-      case "onboarding-role":
-        setScreen("onboarding-name");
-        break;
       case "onboarding-interests":
-        setScreen("onboarding-role");
+        setScreen("onboarding-name");
         break;
       case "profile":
         setScreen("map");
@@ -79,28 +78,28 @@ export default function App() {
       case "rating":
         setScreen("profile");
         break;
+      case "recommendations":
+        setScreen("map");
+        break;
       default:
         break;
     }
   };
 
-  // Сброс — начать заново
   const restart = () => {
     setName("");
     setCountry("");
-    setRole("");
+    setAge("");
+    setCity("");
     setSelectedUser(null);
     setScreen("onboarding-name");
   };
 
-  const handleName = (n: string, c: string) => {
+  const handleName = (n: string, c: string, a: string, ci: string) => {
     setName(n);
     setCountry(c);
-    setScreen("onboarding-role");
-  };
-
-  const handleRole = (r: "local" | "tourist") => {
-    setRole(r);
+    setAge(a);
+    setCity(ci);
     setScreen("onboarding-interests");
   };
 
@@ -109,7 +108,9 @@ export default function App() {
       telegram_id: telegramId,
       name,
       country,
-      role,
+      city,
+      age,
+      role: "tourist",
       interests,
       avatar: getRandomAvatar(),
     };
@@ -136,12 +137,10 @@ export default function App() {
     setScreen("map");
   };
 
-  // Кнопка "Назад" — показывается на всех экранах кроме загрузки и первого
   const showBack = !["loading", "onboarding-name", "map"].includes(screen);
 
   return (
     <>
-      {/* Верхняя панель навигации */}
       {screen !== "loading" && (
         <div style={{
           display: "flex",
@@ -161,23 +160,38 @@ export default function App() {
             </button>
           ) : <div />}
 
-          {screen === "map" && (
-            <button onClick={restart} style={{
-              background: "rgba(255,255,255,0.2)", border: "none", color: "white",
-              fontSize: 13, fontWeight: 700, cursor: "pointer", fontFamily: "Nunito",
-              padding: "6px 14px", borderRadius: 50,
-            }}>
-              Сначала
-            </button>
-          )}
+          <div style={{ display: "flex", gap: 8 }}>
+            {screen === "map" && (
+              <>
+                <button onClick={() => setScreen("recommendations")} style={{
+                  background: "rgba(255,255,255,0.2)", border: "none", color: "white",
+                  fontSize: 13, fontWeight: 700, cursor: "pointer", fontFamily: "Nunito",
+                  padding: "6px 14px", borderRadius: 50,
+                }}>
+                  Рекомендации
+                </button>
+                <button onClick={restart} style={{
+                  background: "rgba(255,255,255,0.2)", border: "none", color: "white",
+                  fontSize: 13, fontWeight: 700, cursor: "pointer", fontFamily: "Nunito",
+                  padding: "6px 14px", borderRadius: 50,
+                }}>
+                  Сначала
+                </button>
+              </>
+            )}
+          </div>
         </div>
       )}
 
       {screen === "loading" && (
-        <div className="screen"><div className="loading">Загрузка...</div></div>
+        <div className="screen">
+          <div className="loading">
+            <div className="loading-spinner" />
+            Загрузка...
+          </div>
+        </div>
       )}
       {screen === "onboarding-name" && <OnboardingName onNext={handleName} />}
-      {screen === "onboarding-role" && <OnboardingRole onNext={handleRole} />}
       {screen === "onboarding-interests" && <OnboardingInterests onNext={handleInterests} />}
       {screen === "map" && <MapScreen telegramId={telegramId} onSelectUser={handleSelectUser} />}
       {screen === "profile" && (
@@ -194,6 +208,7 @@ export default function App() {
           onDone={handleRatingDone}
         />
       )}
+      {screen === "recommendations" && <RecommendationsScreen />}
     </>
   );
 }
