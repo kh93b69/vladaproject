@@ -20,7 +20,7 @@
 
 body {
   font-family: 'Nunito', sans-serif;
-  background: linear-gradient(170deg, #3B0764 0%, #1E1B4B 50%, #172554 100%);
+  background: #9F9DFF;
   min-height: 100vh;
   color: var(--white);
   -webkit-font-smoothing: antialiased;
@@ -299,6 +299,43 @@ body {
   width: 80px;
   height: 80px;
   margin: 0 auto 16px;
+}
+
+/* Карточки выбора роли */
+.role-card {
+  flex: 1;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1.5px solid rgba(255, 255, 255, 0.2);
+  border-radius: 20px;
+  padding: 20px 12px;
+  text-align: center;
+  cursor: pointer;
+  transition: transform 0.15s, background 0.15s, border-color 0.15s;
+}
+
+.role-card:active {
+  transform: scale(0.96);
+  background: rgba(255, 255, 255, 0.2);
+  border-color: var(--purple-light);
+}
+
+.role-card-icon {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 12px;
+}
+
+.role-card-title {
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--white);
+  margin-bottom: 4px;
+}
+
+.role-card-desc {
+  font-size: 13px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.6);
 }
 
 /* Рекомендации */

@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import "./styles/global.css";
 import OnboardingName from "./components/OnboardingName";
+import OnboardingRole from "./components/OnboardingRole";
 import OnboardingInterests from "./components/OnboardingInterests";
 import MapScreen from "./components/MapScreen";
 import ProfileScreen from "./components/ProfileScreen";
@@ -11,6 +12,7 @@ import { createUser, getUser } from "./api";
 type Screen =
   | "loading"
   | "onboarding-name"
+  | "onboarding-role"
   | "onboarding-interests"
   | "map"
   | "profile"
@@ -51,6 +53,7 @@ export default function App() {
   const [country, setCountry] = useState("");
   const [age, setAge] = useState("");
   const [city, setCity] = useState("");
+  const [role, setRole] = useState("");
   const [selectedUser, setSelectedUser] = useState<any>(null);
 
   useEffect(() => {
@@ -69,8 +72,11 @@ export default function App() {
 
   const goBack = () => {
     switch (screen) {
-      case "onboarding-interests":
+      case "onboarding-role":
         setScreen("onboarding-name");
+        break;
+      case "onboarding-interests":
+        setScreen("onboarding-role");
         break;
       case "profile":
         setScreen("map");
@@ -91,6 +97,7 @@ export default function App() {
     setCountry("");
     setAge("");
     setCity("");
+    setRole("");
     setSelectedUser(null);
     setScreen("onboarding-name");
   };
@@ -100,6 +107,11 @@ export default function App() {
     setCountry(c);
     setAge(a);
     setCity(ci);
+    setScreen("onboarding-role");
+  };
+
+  const handleRole = (r: "local" | "tourist") => {
+    setRole(r);
     setScreen("onboarding-interests");
   };
 
@@ -110,7 +122,7 @@ export default function App() {
       country,
       city,
       age,
-      role: "tourist",
+      role,
       interests,
       avatar: getRandomAvatar(),
     };
@@ -164,14 +176,14 @@ export default function App() {
             {screen === "map" && (
               <>
                 <button onClick={() => setScreen("recommendations")} style={{
-                  background: "rgba(255,255,255,0.2)", border: "none", color: "white",
+                  background: "rgba(255,255,255,0.3)", border: "none", color: "white",
                   fontSize: 13, fontWeight: 700, cursor: "pointer", fontFamily: "Nunito",
                   padding: "6px 14px", borderRadius: 50,
                 }}>
                   Рекомендации
                 </button>
                 <button onClick={restart} style={{
-                  background: "rgba(255,255,255,0.2)", border: "none", color: "white",
+                  background: "rgba(255,255,255,0.3)", border: "none", color: "white",
                   fontSize: 13, fontWeight: 700, cursor: "pointer", fontFamily: "Nunito",
                   padding: "6px 14px", borderRadius: 50,
                 }}>
@@ -192,6 +204,7 @@ export default function App() {
         </div>
       )}
       {screen === "onboarding-name" && <OnboardingName onNext={handleName} />}
+      {screen === "onboarding-role" && <OnboardingRole onNext={handleRole} />}
       {screen === "onboarding-interests" && <OnboardingInterests onNext={handleInterests} />}
       {screen === "map" && <MapScreen telegramId={telegramId} onSelectUser={handleSelectUser} />}
       {screen === "profile" && (

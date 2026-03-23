@@ -10,6 +10,7 @@ interface User {
   country?: string;
   distance_km?: number;
   description?: string;
+  avg_rating?: number;
 }
 
 const INTEREST_LABELS: Record<string, string> = {
@@ -58,10 +59,15 @@ export default function ProfileScreen({ user, myTelegramId, onMatch }: Props) {
   const handleMatch = async () => {
     setSending(true);
     try {
-      await createMatch(myTelegramId, user.telegram_id);
+      // Фейковые юзеры (telegram_id >= 900000) не существуют в БД — пропускаем API
+      if (user.telegram_id < 900000) {
+        await createMatch(myTelegramId, user.telegram_id);
+      }
       onMatch();
     } catch (err) {
       console.error("Ошибка:", err);
+      // Даже при ошибке переходим дальше
+      onMatch();
     }
     setSending(false);
   };
@@ -69,21 +75,19 @@ export default function ProfileScreen({ user, myTelegramId, onMatch }: Props) {
   return (
     <div className="screen">
       <div style={{ textAlign: "center", marginBottom: 24 }}>
-        <div
+        <img
+          src={`https://i.pravatar.cc/200?u=${user.telegram_id}`}
+          alt={user.name}
           style={{
             width: 120,
             height: 120,
             borderRadius: "50%",
-            background: user.role === "local" ? "#F43F5E" : "#4ADE80",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            fontSize: 56,
+            objectFit: "cover",
             margin: "0 auto 16px",
+            display: "block",
+            border: "3px solid rgba(255,255,255,0.3)",
           }}
-        >
-          {user.role === "local" ? "🏠" : "✈️"}
-        </div>
+        />
 
         <h1 className="screen-title">{user.name}</h1>
         <p className="screen-subtitle" style={{ marginBottom: 8 }}>
@@ -112,6 +116,18 @@ export default function ProfileScreen({ user, myTelegramId, onMatch }: Props) {
           </span>
         ))}
       </div>
+
+      {/* Звёзды рейтинга */}
+      {!ratings && user.avg_rating !== undefined && user.avg_rating > 0 && (
+        <div style={{ textAlign: "center", marginBottom: 16 }}>
+          <span style={{ fontSize: 20, color: "#FBBF24" }}>
+            {"★".repeat(Math.round(user.avg_rating / 2))}{"☆".repeat(5 - Math.round(user.avg_rating / 2))}
+          </span>
+          <span style={{ fontSize: 16, fontWeight: 700, marginLeft: 8 }}>
+            {user.avg_rating.toFixed(1)} / 10
+          </span>
+        </div>
+      )}
 
       {/* Детальные оценки */}
       {ratings && (

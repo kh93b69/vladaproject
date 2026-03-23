@@ -9,37 +9,23 @@ interface User {
   avg_rating?: number;
 }
 
-const AVATAR_COLORS: Record<string, string> = {
-  "green-hat": "#4ADE80",
-  "purple-viking": "#8B5CF6",
-  "red-bun": "#F43F5E",
-  "lavender-beret": "#A78BFA",
-  "pink-sombrero": "#EC4899",
-};
-
 interface Props {
   user: User;
   onClick?: () => void;
 }
 
 export default function ProfileCard({ user, onClick }: Props) {
-  const bgColor = AVATAR_COLORS[user.avatar] || "#C084FC";
+  // Рандомная фотка человека по telegram_id как seed
+  const photoUrl = `https://i.pravatar.cc/100?u=${user.telegram_id}`;
 
   return (
     <div className="profile-card" onClick={onClick}>
-      <div
+      <img
         className="profile-avatar"
-        style={{
-          backgroundColor: bgColor,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          borderRadius: "50%",
-          fontSize: 24,
-        }}
-      >
-        {user.role === "local" ? "🏠" : "✈️"}
-      </div>
+        src={photoUrl}
+        alt={user.name}
+        style={{ objectFit: "cover" }}
+      />
 
       <div className="profile-info">
         <div className="profile-name">{user.name}</div>

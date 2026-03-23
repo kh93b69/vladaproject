@@ -21,17 +21,25 @@ export default function OnboardingName({ onNext }: Props) {
 
   return (
     <div className="screen">
-      {/* Лого */}
-      <div className="logo">
-        <svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <circle cx="30" cy="40" r="24" fill="white" fillOpacity="0.9"/>
-          <circle cx="50" cy="40" r="24" fill="white" fillOpacity="0.9"/>
-          <circle cx="23" cy="35" r="3" fill="#7C3AED"/>
-          <circle cx="37" cy="35" r="3" fill="#7C3AED"/>
-          <circle cx="43" cy="35" r="3" fill="#7C3AED"/>
-          <circle cx="57" cy="35" r="3" fill="#7C3AED"/>
-          <path d="M20 45 Q30 52 37 45" stroke="#7C3AED" strokeWidth="2.5" strokeLinecap="round" fill="none"/>
-          <path d="M43 45 Q50 52 57 45" stroke="#7C3AED" strokeWidth="2.5" strokeLinecap="round" fill="none"/>
+      {/* Лого — два blob-персонажа MeetMates */}
+      <div style={{ width: 120, height: 80, margin: "0 auto 16px", position: "relative" }}>
+        {/* Левый персонаж (розовый) */}
+        <svg viewBox="0 0 60 60" width="60" height="60" style={{ position: "absolute", left: 0, top: 10 }}>
+          <circle cx="30" cy="30" r="28" fill="#F43F5E"/>
+          <circle cx="22" cy="26" r="4" fill="white"/>
+          <circle cx="38" cy="26" r="4" fill="white"/>
+          <circle cx="22" cy="26" r="2" fill="#1E1B4B"/>
+          <circle cx="38" cy="26" r="2" fill="#1E1B4B"/>
+          <path d="M20 36 Q30 44 40 36" stroke="white" strokeWidth="2.5" strokeLinecap="round" fill="none"/>
+        </svg>
+        {/* Правый персонаж (зелёный) */}
+        <svg viewBox="0 0 60 60" width="60" height="60" style={{ position: "absolute", right: 0, top: 10 }}>
+          <circle cx="30" cy="30" r="28" fill="#4ADE80"/>
+          <circle cx="22" cy="26" r="4" fill="white"/>
+          <circle cx="38" cy="26" r="4" fill="white"/>
+          <circle cx="22" cy="26" r="2" fill="#1E1B4B"/>
+          <circle cx="38" cy="26" r="2" fill="#1E1B4B"/>
+          <path d="M20 36 Q30 44 40 36" stroke="white" strokeWidth="2.5" strokeLinecap="round" fill="none"/>
         </svg>
       </div>
 
