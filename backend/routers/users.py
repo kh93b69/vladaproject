@@ -29,11 +29,11 @@ class UserUpdate(BaseModel):
     longitude: Optional[float] = None
 
 
-# Данные для генерации фейковых гидов
+# Данные для генерации фейковых гидов (имя, пол)
 FAKE_NAMES = [
-    "Мария", "Ахмед", "Лейла", "Дженк", "Айше",
-    "Карлос", "София", "Юки", "Пьер", "Анна",
-    "Марко", "Изабель", "Хироши", "Елена", "Рауль",
+    ("Мария", "female"), ("Ахмед", "male"), ("Лейла", "female"), ("Дженк", "male"), ("Айше", "female"),
+    ("Карлос", "male"), ("София", "female"), ("Юки", "female"), ("Пьер", "male"), ("Анна", "female"),
+    ("Марко", "male"), ("Изабель", "female"), ("Хироши", "male"), ("Елена", "female"), ("Рауль", "male"),
 ]
 
 FAKE_AVATARS = ["green-hat", "purple-viking", "red-bun", "lavender-beret", "pink-sombrero"]
@@ -66,8 +66,9 @@ def generate_fake_guides(lat: float, lon: float, count: int = 5) -> list:
         offset_lat = random.uniform(-0.03, 0.03)
         offset_lon = random.uniform(-0.03, 0.03)
 
-        # Уникальное имя
-        name = random.choice([n for n in FAKE_NAMES if n not in used_names] or FAKE_NAMES)
+        # Уникальное имя + пол
+        available = [(n, g) for n, g in FAKE_NAMES if n not in used_names] or FAKE_NAMES
+        name, gender = random.choice(available)
         used_names.add(name)
 
         # Случайные интересы (2-4 штуки)
@@ -89,6 +90,7 @@ def generate_fake_guides(lat: float, lon: float, count: int = 5) -> list:
             "distance_km": round(distance, 1),
             "description": random.choice(FAKE_DESCRIPTIONS),
             "avg_rating": round(random.uniform(6.0, 9.8), 1),
+            "gender": gender,
             "is_fake": True,
         })
 

@@ -17,7 +17,8 @@ type Screen =
   | "map"
   | "profile"
   | "rating"
-  | "recommendations";
+  | "recommendations"
+  | "thankyou";
 
 interface UserData {
   telegram_id: number;
@@ -146,10 +147,10 @@ export default function App() {
 
   const handleRatingDone = () => {
     setSelectedUser(null);
-    setScreen("map");
+    setScreen("thankyou");
   };
 
-  const showBack = !["loading", "onboarding-name", "map"].includes(screen);
+  const showBack = !["loading", "onboarding-name", "map", "thankyou"].includes(screen);
 
   return (
     <>
@@ -222,6 +223,29 @@ export default function App() {
         />
       )}
       {screen === "recommendations" && <RecommendationsScreen />}
+      {screen === "thankyou" && (
+        <div className="screen" style={{ justifyContent: "center", alignItems: "center", textAlign: "center" }}>
+          <div style={{ width: 140, height: 80, margin: "0 auto 24px" }}>
+            <svg viewBox="0 0 140 80" width="140" height="80">
+              <circle cx="45" cy="40" r="32" fill="white"/>
+              <circle cx="95" cy="40" r="32" fill="white"/>
+              <circle cx="33" cy="35" r="4" fill="#9F9DFF"/>
+              <circle cx="50" cy="32" r="4" fill="#9F9DFF"/>
+              <path d="M30 48 Q42 58 54 48" stroke="#9F9DFF" strokeWidth="3.5" strokeLinecap="round" fill="none"/>
+              <circle cx="90" cy="32" r="4" fill="#9F9DFF"/>
+              <circle cx="107" cy="35" r="4" fill="#9F9DFF"/>
+              <path d="M86 48 Q98 58 110 48" stroke="#9F9DFF" strokeWidth="3.5" strokeLinecap="round" fill="none"/>
+            </svg>
+          </div>
+          <h1 className="screen-title" style={{ marginBottom: 12 }}>Спасибо!</h1>
+          <p className="screen-subtitle" style={{ marginBottom: 32 }}>
+            Спасибо, что использовали MeetMates
+          </p>
+          <button className="btn-primary" onClick={restart}>
+            Начать сначала
+          </button>
+        </div>
+      )}
     </>
   );
 }

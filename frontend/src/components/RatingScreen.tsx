@@ -21,16 +21,20 @@ export default function RatingScreen({ mate, myTelegramId, onDone }: Props) {
   const handleSubmit = async () => {
     setSending(true);
     try {
-      await createRating({
-        from_telegram_id: myTelegramId,
-        to_telegram_id: mate.telegram_id,
-        safety,
-        experience,
-        communication,
-      });
+      // Фейковые юзеры (telegram_id >= 900000) не в БД — пропускаем
+      if (mate.telegram_id < 900000) {
+        await createRating({
+          from_telegram_id: myTelegramId,
+          to_telegram_id: mate.telegram_id,
+          safety,
+          experience,
+          communication,
+        });
+      }
       onDone();
     } catch (err) {
       console.error("Ошибка:", err);
+      onDone();
     }
     setSending(false);
   };

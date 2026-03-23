@@ -7,6 +7,7 @@ interface User {
   distance_km?: number;
   description?: string;
   avg_rating?: number;
+  gender?: string;
 }
 
 interface Props {
@@ -14,9 +15,16 @@ interface Props {
   onClick?: () => void;
 }
 
+// Фото по полу через randomuser.me (seed = telegram_id для стабильности)
+function getPhotoUrl(user: User, size = 100): string {
+  const gender = user.gender === "male" ? "men" : "women";
+  // Стабильный индекс от telegram_id (0-99)
+  const idx = Math.abs(user.telegram_id) % 100;
+  return `https://randomuser.me/api/portraits/${gender}/${idx}.jpg`;
+}
+
 export default function ProfileCard({ user, onClick }: Props) {
-  // Рандомная фотка человека по telegram_id как seed
-  const photoUrl = `https://i.pravatar.cc/100?u=${user.telegram_id}`;
+  const photoUrl = getPhotoUrl(user);
 
   return (
     <div className="profile-card" onClick={onClick}>
