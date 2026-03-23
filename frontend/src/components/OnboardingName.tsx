@@ -21,25 +21,22 @@ export default function OnboardingName({ onNext }: Props) {
 
   return (
     <div className="screen">
-      {/* Лого — два blob-персонажа MeetMates */}
-      <div style={{ width: 120, height: 80, margin: "0 auto 16px", position: "relative" }}>
-        {/* Левый персонаж (розовый) */}
-        <svg viewBox="0 0 60 60" width="60" height="60" style={{ position: "absolute", left: 0, top: 10 }}>
-          <circle cx="30" cy="30" r="28" fill="#F43F5E"/>
-          <circle cx="22" cy="26" r="4" fill="white"/>
-          <circle cx="38" cy="26" r="4" fill="white"/>
-          <circle cx="22" cy="26" r="2" fill="#1E1B4B"/>
-          <circle cx="38" cy="26" r="2" fill="#1E1B4B"/>
-          <path d="M20 36 Q30 44 40 36" stroke="white" strokeWidth="2.5" strokeLinecap="round" fill="none"/>
-        </svg>
-        {/* Правый персонаж (зелёный) */}
-        <svg viewBox="0 0 60 60" width="60" height="60" style={{ position: "absolute", right: 0, top: 10 }}>
-          <circle cx="30" cy="30" r="28" fill="#4ADE80"/>
-          <circle cx="22" cy="26" r="4" fill="white"/>
-          <circle cx="38" cy="26" r="4" fill="white"/>
-          <circle cx="22" cy="26" r="2" fill="#1E1B4B"/>
-          <circle cx="38" cy="26" r="2" fill="#1E1B4B"/>
-          <path d="M20 36 Q30 44 40 36" stroke="white" strokeWidth="2.5" strokeLinecap="round" fill="none"/>
+      {/* Лого MeetMates — два белых пересекающихся круга с лицами */}
+      <div style={{ width: 140, height: 90, margin: "0 auto 16px" }}>
+        <svg viewBox="0 0 140 80" width="140" height="80">
+          {/* Два белых пересекающихся круга */}
+          <circle cx="45" cy="40" r="32" fill="white"/>
+          <circle cx="95" cy="40" r="32" fill="white"/>
+          {/* Левое лицо — глаза (фиолетовые = цвет фона) */}
+          <circle cx="33" cy="35" r="4" fill="#9F9DFF"/>
+          <circle cx="50" cy="32" r="4" fill="#9F9DFF"/>
+          {/* Левая улыбка */}
+          <path d="M30 48 Q42 58 54 48" stroke="#9F9DFF" strokeWidth="3.5" strokeLinecap="round" fill="none"/>
+          {/* Правое лицо — глаза */}
+          <circle cx="90" cy="32" r="4" fill="#9F9DFF"/>
+          <circle cx="107" cy="35" r="4" fill="#9F9DFF"/>
+          {/* Правая улыбка */}
+          <path d="M86 48 Q98 58 110 48" stroke="#9F9DFF" strokeWidth="3.5" strokeLinecap="round" fill="none"/>
         </svg>
       </div>
 
