@@ -19,42 +19,40 @@ interface User {
 interface Props {
   telegramId: number;
   onSelectUser: (user: User) => void;
+  cityCoords?: { lat: number; lng: number } | null;
+  cityName?: string;
 }
 
-export default function MapScreen({ telegramId, onSelectUser }: Props) {
+export default function MapScreen({ telegramId, onSelectUser, cityCoords, cityName }: Props) {
   const [users, setUsers] = useState<User[]>([]);
-  const [position, setPosition] = useState<[number, number] | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        async (pos) => {
-          const lat = pos.coords.latitude;
-          const lng = pos.coords.longitude;
-          setPosition([lat, lng]);
+    const loadUsers = async (lat: number, lng: number) => {
+      try {
+        await updateUser(telegramId, { latitude: lat, longitude: lng });
+        const nearby = await getNearbyUsers(telegramId);
+        setUsers(nearby);
+      } catch (err) {
+        console.error("Ошибка загрузки:", err);
+      }
+      setLoading(false);
+    };
 
-          try {
-            await updateUser(telegramId, { latitude: lat, longitude: lng });
-            const nearby = await getNearbyUsers(telegramId);
-            setUsers(nearby);
-          } catch (err) {
-            console.error("Ошибка загрузки:", err);
-          }
-          setLoading(false);
-        },
-        () => {
-          setPosition([55.7558, 37.6173]);
-          setLoading(false);
-        }
+    // Используем координаты города если есть, иначе геолокацию
+    if (cityCoords) {
+      loadUsers(cityCoords.lat, cityCoords.lng);
+    } else if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (pos) => loadUsers(pos.coords.latitude, pos.coords.longitude),
+        () => loadUsers(55.7558, 37.6173)
       );
     } else {
-      setPosition([55.7558, 37.6173]);
-      setLoading(false);
+      loadUsers(55.7558, 37.6173);
     }
-  }, [telegramId]);
+  }, [telegramId, cityCoords]);
 
-  if (loading || !position) {
+  if (loading) {
     return (
       <div className="screen">
         <div className="loading">
@@ -66,76 +64,68 @@ export default function MapScreen({ telegramId, onSelectUser }: Props) {
   }
 
   return (
-    <div className="screen" style={{ padding: "16px 16px" }}>
-      <h1 className="screen-title" style={{ fontSize: 22, marginBottom: 16 }}>
+    <div className="screen animate-fade-in" style={{ padding: "16px 16px" }}>
+      <h1 className="screen-title" style={{ fontSize: 22, marginBottom: 4 }}>
         Люди рядом
       </h1>
+      {cityName && (
+        <p className="screen-subtitle" style={{ marginBottom: 16 }}>{cityName}</p>
+      )}
 
       {/* Стилизованная карта */}
       <div style={{
         borderRadius: 20,
         overflow: "hidden",
-        height: 220,
+        height: 200,
         marginBottom: 20,
         background: "linear-gradient(135deg, #C4B5FD 0%, #818CF8 50%, #A78BFA 100%)",
         position: "relative",
         border: "1px solid rgba(255,255,255,0.2)",
       }}>
-        {/* Декоративные линии-дороги */}
-        <svg width="100%" height="100%" style={{ position: "absolute", top: 0, left: 0 }}>
-          <path d="M0 80 Q120 60 200 90 Q300 120 400 70" stroke="rgba(255,255,255,0.2)" strokeWidth="2" fill="none"/>
-          <path d="M0 140 Q100 120 180 150 Q280 180 400 130" stroke="rgba(255,255,255,0.2)" strokeWidth="2" fill="none"/>
-          <path d="M80 0 Q90 80 70 150 Q60 200 80 260" stroke="rgba(255,255,255,0.15)" strokeWidth="1.5" fill="none"/>
-          <path d="M250 0 Q240 70 260 140 Q270 200 250 260" stroke="rgba(255,255,255,0.15)" strokeWidth="1.5" fill="none"/>
+        {/* Декоративные линии */}
+        <svg width="100%" height="100%" style={{ position: "absolute", top: 0, left: 0, opacity: 0.3 }}>
+          <path d="M0 70 Q100 50 200 80 Q320 110 420 60" stroke="white" strokeWidth="1.5" fill="none"/>
+          <path d="M0 130 Q80 110 180 140 Q300 170 420 120" stroke="white" strokeWidth="1.5" fill="none"/>
+          <path d="M70 0 Q80 70 60 140 Q50 190 70 250" stroke="white" strokeWidth="1" fill="none"/>
+          <path d="M260 0 Q250 60 270 130 Q280 190 260 250" stroke="white" strokeWidth="1" fill="none"/>
         </svg>
 
-        {/* Метка "Ты здесь" */}
+        {/* Центр — "Ты здесь" */}
         <div style={{
           position: "absolute", top: "45%", left: "50%", transform: "translate(-50%, -50%)",
-          display: "flex", flexDirection: "column", alignItems: "center",
+          display: "flex", flexDirection: "column", alignItems: "center", zIndex: 2,
         }}>
           <div style={{
-            width: 16, height: 16, borderRadius: "50%",
+            width: 14, height: 14, borderRadius: "50%",
             background: "white", border: "3px solid #7C3AED",
             boxShadow: "0 0 0 4px rgba(124,58,237,0.3)",
           }} />
-          <span style={{ fontSize: 11, fontWeight: 700, color: "white", marginTop: 4, textShadow: "0 1px 3px rgba(0,0,0,0.3)" }}>
+          <span style={{ fontSize: 10, fontWeight: 700, color: "white", marginTop: 3 }}>
             Ты здесь
           </span>
         </div>
 
-        {/* Маркеры-точки для гидов */}
+        {/* Маркеры-флажки */}
         {users.slice(0, 5).map((u, i) => {
           const positions = [
-            { top: "20%", left: "25%" },
-            { top: "30%", left: "75%" },
-            { top: "65%", left: "20%" },
-            { top: "60%", left: "70%" },
-            { top: "15%", left: "55%" },
+            { top: "22%", left: "22%" },
+            { top: "28%", left: "78%" },
+            { top: "68%", left: "18%" },
+            { top: "62%", left: "72%" },
+            { top: "18%", left: "52%" },
           ];
           const pos = positions[i];
           return (
             <div
               key={u.telegram_id}
               onClick={() => onSelectUser(u)}
-              style={{
-                position: "absolute", ...pos,
-                cursor: "pointer",
-                display: "flex", flexDirection: "column", alignItems: "center",
-              }}
+              style={{ position: "absolute", ...pos, cursor: "pointer", zIndex: 1 }}
             >
-              <div style={{
-                width: 12, height: 12, borderRadius: "50%",
-                background: "white",
-                border: "2px solid rgba(255,255,255,0.8)",
-                boxShadow: "0 2px 6px rgba(0,0,0,0.2)",
-              }} />
-              <span style={{
-                fontSize: 10, fontWeight: 700, color: "white",
-                marginTop: 2, textShadow: "0 1px 2px rgba(0,0,0,0.3)",
-              }}>
-                {u.name.split(" ")[0]}
-              </span>
+              <svg width="20" height="26" viewBox="0 0 20 26">
+                <path d="M10 25 L10 8" stroke="white" strokeWidth="2"/>
+                <circle cx="10" cy="7" r="6" fill="white" stroke="rgba(124,58,237,0.5)" strokeWidth="1.5"/>
+                <circle cx="10" cy="7" r="3" fill="#7C3AED"/>
+              </svg>
             </div>
           );
         })}

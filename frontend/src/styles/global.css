@@ -64,9 +64,9 @@ body {
 .input-field {
   width: 100%;
   padding: 16px 20px;
-  border: 1px solid rgba(255, 255, 255, 0.15);
+  border: 1.5px solid rgba(255, 255, 255, 0.2);
   border-radius: 16px;
-  background: rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.12);
   font-size: 16px;
   font-family: 'Nunito', sans-serif;
   font-weight: 600;
@@ -74,6 +74,7 @@ body {
   outline: none;
   margin-bottom: 12px;
   backdrop-filter: blur(10px);
+  transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
 }
 
 .input-field::placeholder {
@@ -90,9 +91,9 @@ body {
 .select-field {
   width: 100%;
   padding: 16px 20px;
-  border: 1px solid rgba(255, 255, 255, 0.15);
+  border: 1.5px solid rgba(255, 255, 255, 0.2);
   border-radius: 16px;
-  background: rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.12);
   font-size: 16px;
   font-family: 'Nunito', sans-serif;
   font-weight: 600;
@@ -101,6 +102,17 @@ body {
   margin-bottom: 12px;
   appearance: none;
   cursor: pointer;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.select-field:focus {
+  border-color: var(--purple-light);
+  box-shadow: 0 0 0 2px rgba(167, 139, 250, 0.3);
+}
+
+.select-field:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
 }
 
 .select-field option {
@@ -292,6 +304,22 @@ body {
 
 @keyframes spin {
   to { transform: rotate(360deg); }
+}
+
+/* Анимация появления экранов */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in {
+  animation: fadeInUp 0.4s ease-out;
 }
 
 /* Лого */

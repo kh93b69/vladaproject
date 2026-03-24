@@ -21,7 +21,6 @@ export default function RatingScreen({ mate, myTelegramId, onDone }: Props) {
   const handleSubmit = async () => {
     setSending(true);
     try {
-      // Фейковые юзеры (telegram_id >= 900000) не в БД — пропускаем
       if (mate.telegram_id < 900000) {
         await createRating({
           from_telegram_id: myTelegramId,
@@ -40,13 +39,13 @@ export default function RatingScreen({ mate, myTelegramId, onDone }: Props) {
   };
 
   return (
-    <div className="screen">
+    <div className="screen animate-fade-in">
       <h1 className="screen-title">Оцени спутника</h1>
       <p className="screen-subtitle">Как прошла встреча с {mate.name}?</p>
 
       <div style={{ flex: 1 }}>
         <div className="rating-category">
-          <div className="rating-label">🛡 Безопасность</div>
+          <div className="rating-label">Безопасность</div>
           <input
             type="range"
             min={1}
@@ -59,7 +58,7 @@ export default function RatingScreen({ mate, myTelegramId, onDone }: Props) {
         </div>
 
         <div className="rating-category">
-          <div className="rating-label">🎯 Времяпрепровождение</div>
+          <div className="rating-label">Времяпрепровождение</div>
           <input
             type="range"
             min={1}
@@ -72,7 +71,7 @@ export default function RatingScreen({ mate, myTelegramId, onDone }: Props) {
         </div>
 
         <div className="rating-category">
-          <div className="rating-label">💬 Общение</div>
+          <div className="rating-label">Общение</div>
           <input
             type="range"
             min={1}

@@ -54,6 +54,7 @@ export default function App() {
   const [country, setCountry] = useState("");
   const [age, setAge] = useState("");
   const [city, setCity] = useState("");
+  const [cityCoords, setCityCoords] = useState<{ lat: number; lng: number } | null>(null);
   const [role, setRole] = useState("");
   const [selectedUser, setSelectedUser] = useState<any>(null);
 
@@ -98,16 +99,18 @@ export default function App() {
     setCountry("");
     setAge("");
     setCity("");
+    setCityCoords(null);
     setRole("");
     setSelectedUser(null);
     setScreen("onboarding-name");
   };
 
-  const handleName = (n: string, c: string, a: string, ci: string) => {
+  const handleName = (n: string, c: string, a: string, ci: string, lat: number, lng: number) => {
     setName(n);
     setCountry(c);
     setAge(a);
     setCity(ci);
+    setCityCoords({ lat, lng });
     setScreen("onboarding-role");
   };
 
@@ -154,7 +157,7 @@ export default function App() {
 
   return (
     <>
-      {screen !== "loading" && (
+      {screen !== "loading" && screen !== "thankyou" && (
         <div style={{
           display: "flex",
           justifyContent: "space-between",
@@ -207,7 +210,14 @@ export default function App() {
       {screen === "onboarding-name" && <OnboardingName onNext={handleName} />}
       {screen === "onboarding-role" && <OnboardingRole onNext={handleRole} />}
       {screen === "onboarding-interests" && <OnboardingInterests onNext={handleInterests} />}
-      {screen === "map" && <MapScreen telegramId={telegramId} onSelectUser={handleSelectUser} />}
+      {screen === "map" && (
+        <MapScreen
+          telegramId={telegramId}
+          onSelectUser={handleSelectUser}
+          cityCoords={cityCoords}
+          cityName={city}
+        />
+      )}
       {screen === "profile" && (
         <ProfileScreen
           user={selectedUser}
@@ -224,7 +234,7 @@ export default function App() {
       )}
       {screen === "recommendations" && <RecommendationsScreen />}
       {screen === "thankyou" && (
-        <div className="screen" style={{ justifyContent: "center", alignItems: "center", textAlign: "center" }}>
+        <div className="screen animate-fade-in" style={{ justifyContent: "center", alignItems: "center", textAlign: "center" }}>
           <div style={{ width: 140, height: 80, margin: "0 auto 24px" }}>
             <svg viewBox="0 0 140 80" width="140" height="80">
               <circle cx="45" cy="40" r="32" fill="white"/>

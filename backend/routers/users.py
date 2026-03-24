@@ -29,11 +29,11 @@ class UserUpdate(BaseModel):
     longitude: Optional[float] = None
 
 
-# Данные для генерации фейковых гидов (имя, пол)
+# Данные для генерации фейковых гидов (имя, пол, фиксированный photo_id)
 FAKE_NAMES = [
-    ("Мария", "female"), ("Ахмед", "male"), ("Лейла", "female"), ("Дженк", "male"), ("Айше", "female"),
-    ("Карлос", "male"), ("София", "female"), ("Юки", "female"), ("Пьер", "male"), ("Анна", "female"),
-    ("Марко", "male"), ("Изабель", "female"), ("Хироши", "male"), ("Елена", "female"), ("Рауль", "male"),
+    ("Мария", "female", 12), ("Ахмед", "male", 15), ("Лейла", "female", 28), ("Дженк", "male", 33), ("Айше", "female", 41),
+    ("Карлос", "male", 52), ("София", "female", 55), ("Юки", "female", 63), ("Пьер", "male", 71), ("Анна", "female", 77),
+    ("Марко", "male", 81), ("Изабель", "female", 85), ("Хироши", "male", 91), ("Елена", "female", 95), ("Рауль", "male", 97),
 ]
 
 FAKE_AVATARS = ["green-hat", "purple-viking", "red-bun", "lavender-beret", "pink-sombrero"]
@@ -56,23 +56,28 @@ FAKE_DESCRIPTIONS = [
 ]
 
 
-def generate_fake_guides(lat: float, lon: float, count: int = 5) -> list:
-    """Генерация фейковых гидов рядом с пользователем"""
+def generate_fake_guides(lat: float, lon: float, count: int = 5, user_interests: list = None) -> list:
+    """Генерация фейковых гидов рядом с пользователем, подобранных по интересам"""
     guides = []
     used_names = set()
 
     for i in range(count):
-        # Случайное смещение: 0.5-5 км от пользователя
         offset_lat = random.uniform(-0.03, 0.03)
         offset_lon = random.uniform(-0.03, 0.03)
 
-        # Уникальное имя + пол
-        available = [(n, g) for n, g in FAKE_NAMES if n not in used_names] or FAKE_NAMES
-        name, gender = random.choice(available)
+        # Уникальное имя + пол + photo_id
+        available = [(n, g, p) for n, g, p in FAKE_NAMES if n not in used_names] or FAKE_NAMES
+        name, gender, photo_id = random.choice(available)
         used_names.add(name)
 
-        # Случайные интересы (2-4 штуки)
-        interests = random.sample(ALL_INTERESTS, random.randint(2, 4))
+        # Интересы: минимум 1-2 совпадения с пользователем + 1-2 случайных
+        if user_interests and len(user_interests) > 0:
+            matched = random.sample(user_interests, min(random.randint(1, 2), len(user_interests)))
+            remaining = [x for x in ALL_INTERESTS if x not in matched]
+            extra = random.sample(remaining, min(random.randint(1, 2), len(remaining)))
+            interests = list(set(matched + extra))
+        else:
+            interests = random.sample(ALL_INTERESTS, random.randint(2, 4))
 
         fake_lat = lat + offset_lat
         fake_lon = lon + offset_lon
@@ -91,6 +96,7 @@ def generate_fake_guides(lat: float, lon: float, count: int = 5) -> list:
             "description": random.choice(FAKE_DESCRIPTIONS),
             "avg_rating": round(random.uniform(6.0, 9.8), 1),
             "gender": gender,
+            "photo_id": photo_id,
             "is_fake": True,
         })
 
@@ -166,7 +172,7 @@ def get_nearby_users(telegram_id: int, radius_km: float = 50):
     # Если реальных мало — добавляем фейковых гидов
     if len(nearby) < 3:
         fakes_needed = 5 - len(nearby)
-        fakes = generate_fake_guides(user["latitude"], user["longitude"], fakes_needed)
+        fakes = generate_fake_guides(user["latitude"], user["longitude"], fakes_needed, user.get("interests", []))
         nearby.extend(fakes)
 
     nearby.sort(key=lambda x: x["distance_km"])

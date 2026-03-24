@@ -12,6 +12,7 @@ interface User {
   description?: string;
   avg_rating?: number;
   gender?: string;
+  photo_id?: number;
 }
 
 const INTEREST_LABELS: Record<string, string> = {
@@ -77,7 +78,7 @@ export default function ProfileScreen({ user, myTelegramId, onMatch }: Props) {
     <div className="screen">
       <div style={{ textAlign: "center", marginBottom: 24 }}>
         <img
-          src={`https://randomuser.me/api/portraits/${user.gender === "male" ? "men" : "women"}/${Math.abs(user.telegram_id) % 100}.jpg`}
+          src={`https://randomuser.me/api/portraits/${user.gender === "male" ? "men" : "women"}/${user.photo_id ?? Math.abs(user.telegram_id) % 100}.jpg`}
           alt={user.name}
           style={{
             width: 120,
