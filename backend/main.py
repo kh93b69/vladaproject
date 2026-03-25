@@ -84,18 +84,11 @@ def start_bot():
                 return
             try:
                 users_result = supabase.table("users").select("id", count="exact").execute()
-                matches_result = supabase.table("matches").select("id", count="exact").execute()
-                ratings_result = supabase.table("ratings").select("id", count="exact").execute()
-
                 total_users = users_result.count if users_result.count is not None else len(users_result.data)
-                total_matches = matches_result.count if matches_result.count is not None else len(matches_result.data)
-                total_ratings = ratings_result.count if ratings_result.count is not None else len(ratings_result.data)
 
                 text = (
                     f"📊 Статистика MeetMates\n\n"
                     f"👥 Пользователей: {total_users}\n"
-                    f"🤝 Мэтчей: {total_matches}\n"
-                    f"⭐ Оценок: {total_ratings}\n"
                 )
                 await update.message.reply_text(text)
             except Exception as e:
